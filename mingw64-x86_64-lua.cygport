@@ -1,0 +1,31 @@
+CROSS_HOST="x86_64-w64-mingw32"
+inherit cross
+
+NAME="mingw64-x86_64-lua"
+VERSION=5.2.2
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="Lua language interpreter for Win64 toolchain"
+DESCRIPTION="Lua is a powerful, light-weight programming language designed for
+extending applications. Lua is also frequently used as a general-purpose,
+stand-alone language."
+HOMEPAGE="http://www.lua.org/"
+SRC_URI="http://www.lua.org/ftp/lua-${VERSION}.tar.gz"
+SRC_DIR="lua-${VERSION}"
+
+src_compile() {
+	lndirs
+	cd ${B}/src
+	cygmake -j1 lua52.dll LUA_A="lua52.dll" \
+		CC=${CC} \
+		AR="${CC} -shared -Wl,--out-implib,liblua.dll.a -o" \
+		RANLIB=: \
+		MYCFLAGS="${CFLAGS} -DLUA_BUILD_AS_DLL" MYLIBS= MYLDFLAGS=
+}
+
+src_install() {
+	cd ${B}
+	cyginstall TO_BIN=lua52.dll TO_LIB=liblua.dll.a \
+		INSTALL_TOP=${D}${CROSS_PREFIX}
+	rm -fr ${D}${CROSS_PREFIX}/man/
+}
